@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Transformers\ResponseTransformer;
 use Illuminate\Http\Request;
 
+use App\Modules\Images\Domain\Manager;
+
 use App\Validations\Image\Image as ImageValidation;
 
 class Image extends Controller {
@@ -65,6 +67,6 @@ class Image extends Controller {
      */
     public function get (string $imageType, int $imageId) {
         // fetch image by type and id
-        return response((new ImageManager)->get ($imageType, $imageId), 200)->header('Content-Type', 'image/jpeg');
+        return response((new Manager)->get ($imageType, $imageId), 200)->header('Content-Type', 'image/*');
     }
 }

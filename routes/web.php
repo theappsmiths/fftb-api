@@ -25,6 +25,7 @@ $router->group(['prefix' => 'users', 'namespace' => '\App\Modules\Users\Applicat
         $router->delete ('logout', 'Auth@logout');
         $router->get ('/', 'User@detail');
         $router->put ('/', 'User@update');
+        $router->put ('/change-password', 'User@changePassword');
     });
 });
 

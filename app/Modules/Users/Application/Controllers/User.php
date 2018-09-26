@@ -10,6 +10,7 @@ use App\Validations\Users\Register;
 use App\Validations\Users\Profile;
 use App\Validations\Users\Device;
 use App\Validations\Users\ProfileUpdate;
+use App\Validations\Users\Password;
 
 use App\Modules\Users\Domain\Manager;
 
@@ -151,5 +152,42 @@ class User extends Controller {
 
         // validate profile-update fields
         return $validator->validate ($data);
+    }
+
+    /**
+     * Method to update password of login user
+     * 
+     * @api users/change-password
+     * @method PUT
+     * 
+     * @success-format: {"status":"success","title":"user","message":"password successfully updated.","data":{}}
+     * 
+     * @table:  tbl_users
+     * 
+     * @return ResponseTransformer
+     */
+    public function changePassword (Password $validator, Request $request) {
+        // validate change password fields
+        $validator->rules['oldPassword'] = $validator->rules['password'];
+
+        // check for any error if occur
+        if ($validation = $validator->validate ($request->all())) {
+            return ResponseTransformer::response (false, 'user', 'parameter errors', $validation->messages()->toArray(), 422);
+        }
+
+        // fetch user information
+        $user = $request->user()->first();
+
+        // verify user old password
+        if (!app('hash')->check ($request->oldPassword, $user->password)) {
+            return ResponseTransformer::response (false, 'user', 'Permission denied', ['Invalid old password'], 403);
+        }
+
+        // update user password
+        if ((new Manager)->updateUser ($user, $request->only (['password']))) {
+            return ResponseTransformer::response (true, 'user', 'password successfully updated.');
+        }
+
+        return ResponseTransformer::response (false, 'user');
     }
 }

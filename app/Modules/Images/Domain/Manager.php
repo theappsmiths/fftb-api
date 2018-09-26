@@ -4,6 +4,8 @@ namespace App\Modules\Images\Domain;
 
 use Illuminate\Filesystem\Filesystem;
 
+use App\Modules\Users\Domain\Manager as UserManager;
+
 class Manager {
 
     /**
@@ -15,18 +17,17 @@ class Manager {
      * @return file
      */
     public function get (string $imageType, int $imageId) {
-        $path = $this->getPath ($imageType, $imageId);
+        // find for image path from DB else display no-image as default
+        $path = $this->getPath ($imageType, $imageId) ?? 'no-img.jpg';
+        
+        // update path in file-structure format
+        $path = storage_path ("app/{$path}");
 
         $file = new Filesystem;
 
-        // check if image path found
-        if ($path) {
-            $path = storage_path ("app/{$path}");
-
-            // check if file exists
-            if ($file->exists ($path)) {
-                return $file->get ($path);
-            }
+        // check if file exists
+        if ($file->exists ($path)) {
+            return $file->get ($path);
         }
     }
 
@@ -35,20 +36,17 @@ class Manager {
      * Search for file path
      */
     protected function getPath (string $imageType, int $imageId) {
-        $path = null;
 
         switch (strtoupper (trim ($imageType))) {
             case 'AVATAR':
-                // check if user image exists
-                $user = (new User)->find ($imageId);
-                // check if user exists the redirect it's image
-                $path = $user ? $user->image : null;
-                break;
-            default:
-                break;
-        }
+                // check if user id exists
+                $user = (new UserManager)->findUserByAttr ('id', $imageId);
 
-        return $path;
+                // check if user exists the redirect it's image
+                return $user ? $user->profile()->first()->image : null;
+            default:
+                return null;
+        }
     }
 
 }

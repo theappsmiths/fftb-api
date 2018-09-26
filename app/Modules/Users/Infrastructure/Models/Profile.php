@@ -10,8 +10,6 @@ class Profile extends Model
 {
     use SoftDeletes;
 
-    const DEFAULT_AVATAR = '';
-
     /**
      * The table associated with the model.
      *
@@ -87,6 +85,6 @@ class Profile extends Model
     }
 
     public function getAvatarAttribute () {
-        return !empty (trim ($this->image)) ? url('/images/avatar/'.$this->userId) : self::DEFAULT_AVATAR;
+        return url('/image/avatar/'.$this->userId);
     }
 }
