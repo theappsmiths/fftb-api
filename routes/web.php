@@ -23,6 +23,13 @@ $router->group(['prefix' => 'users', 'namespace' => '\App\Modules\Users\Applicat
 
     $router->group(['middleware' => 'auth:api'], function () use ($router) {
         $router->delete ('logout', 'Auth@logout');
+        $router->get ('/', 'User@detail');
+        $router->put ('/', 'User@update');
     });
+});
 
+// routes for image
+$router->group(['prefix' => 'image', 'namespace' => '\App\Modules\Images\Application\Controllers'], function () use ($router) {
+    $router->post ('/', 'Image@store');
+    $router->get ('/{imageType}/{imageId}', 'Image@get');
 });

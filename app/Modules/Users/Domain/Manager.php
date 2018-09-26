@@ -52,17 +52,6 @@ class Manager {
     }
 
     /**
-     * Method to find User by Email
-     * 
-     * @param string email
-     * 
-     * @return collection
-     */
-    public function findUserByEmail (string $email) {
-        return (new User)->findUserByAttr ('email', $email)->first();
-    }
-
-    /**
      * method to find User by verification method
      * 
      * @param  string verification-type
@@ -94,7 +83,7 @@ class Manager {
      * @return boolean
      */
     public function updateUserProfile ($user, array $data) {
-        $user->profile()->update ($data);
+        return $user->profile()->update ($data);
     }
 
     /**

@@ -10,6 +10,8 @@ class Profile extends Model
 {
     use SoftDeletes;
 
+    const DEFAULT_AVATAR = '';
+
     /**
      * The table associated with the model.
      *
@@ -29,7 +31,7 @@ class Profile extends Model
      * 
      * @var array
      */
-    protected $appends = ['name'];
+    protected $appends = ['name', 'avatar'];
 
     /**
      * Set primary key behaviour
@@ -56,7 +58,7 @@ class Profile extends Model
      */
     protected $hidden = [
         'updated_at', 'created_at', 'deleted_at',
-        'password', 'countryId'
+        'password', 'countryId', 'image', 'userId'
     ];
 
      /**
@@ -82,5 +84,9 @@ class Profile extends Model
 
     public function getNameAttribute () {
         return $this->firstName . ' ' . $this->lastName;
+    }
+
+    public function getAvatarAttribute () {
+        return !empty (trim ($this->image)) ? url('/images/avatar/'.$this->userId) : self::DEFAULT_AVATAR;
     }
 }

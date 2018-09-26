@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Validations\Users\Register;
 use App\Validations\Users\Profile;
 use App\Validations\Users\Device;
+use App\Validations\Users\ProfileUpdate;
 
 use App\Modules\Users\Domain\Manager;
 
@@ -93,4 +94,62 @@ class User extends Controller {
         return $validator->validate ($data);
     }
 
+    /**
+     * Method to display Login user detail
+     * 
+     * @api users
+     * @method  GET
+     * 
+     * @success-format: {"status":"success","title":"User","message":"User detail successfully found","data":{"id":1,"email":"emai@email.com","role":"customer","profile":{"firstName":"firstName","lastName":"lastName","mobile":"9632145870","address":"addressaddress","postCode":"postCode","mobile_verified":null,"email_verified":true,"name":"firstName lastName","avatar":"http:\/\/localhost:3000\/images\/avatar\/1"}}}
+     * 
+     * @return ResponseTransformer
+     */
+    public function detail (Request $request) {
+        // fetch user detail from request
+        return ResponseTransformer::response (true, 'User', 'User detail successfully found', $request->user()->with('profile')->first()->toArray());
+    }
+
+    /**
+     * Method to update User Detail
+     * 
+     * @api users
+     * @method  PUT
+     * 
+     * @table:  tbl_users
+     * @table:  tbl_user_profile
+     * 
+     * @success-format: {"status":"success","title":"User","message":"User detail successfully updated","data":{}}
+     * 
+     * @return ResponseTransformer
+     */
+    public function update (ProfileUpdate $validator, Request $request) {
+
+        // find user from request
+        $user = $request->user()->first();
+
+        // check for any error if occur
+        if ($validation = $this->validateProfileFields ($validator, $request->all(), $user->id)) {
+            return ResponseTransformer::response (false, 'user', 'parameter errors', $validation->messages()->toArray(), 422);
+        }
+
+        // update user information
+        if ((new Manager)->updateUserProfile ($user, $request->only (['firstName', 'lastName', 'mobile', 'countryId', 'image', 'address', 'postCode']))) {
+            return ResponseTransformer::response (true, 'User', 'User detail successfully updated');
+        }
+
+        return ResponseTransformer::response (false, 'User');
+    }
+
+    /**
+     * Method to update and validate user profile update fields
+     * 
+     * @return validator
+     */
+    private function validateProfileFields (ProfileUpdate $validator, array $data, int $userId) {
+        // append userId on mobile update
+        $validator->rules['mobile'] .= ",{$userId},userId,deleted_at,NULL";
+
+        // validate profile-update fields
+        return $validator->validate ($data);
+    }
 }

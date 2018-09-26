@@ -35,7 +35,7 @@ class ForgetPwdEmail extends Job
     public function handle()
     {
         // find user by email
-        $user = (new Manager)->findUserByEmail ($this->email);
+        $user = (new Manager)->findUserByAttr ('email', $this->email);
 
         // generate unique token
         $token = md5 (microtime (true));
