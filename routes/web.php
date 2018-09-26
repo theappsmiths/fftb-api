@@ -26,6 +26,13 @@ $router->group(['prefix' => 'users', 'namespace' => '\App\Modules\Users\Applicat
         $router->get ('/', 'User@detail');
         $router->put ('/', 'User@update');
         $router->put ('/change-password', 'User@changePassword');
+
+        // API's access by admin only
+        $router->group (['middleware' => 'role:admin'], function () use ($router) {
+            $router->get ('list', 'Admin@getUsers');
+            $router->put ('{userId}', 'User@update');
+            $router->put ('{userId}/change-password', 'User@changePassword');
+        });
     });
 });
 

@@ -114,19 +114,27 @@ class User extends Controller {
      * Method to update User Detail
      * 
      * @api users
+     * @api users/{userId}
      * @method  PUT
      * 
      * @table:  tbl_users
      * @table:  tbl_user_profile
      * 
+     * @access login-user/admin
+     * 
      * @success-format: {"status":"success","title":"User","message":"User detail successfully updated","data":{}}
      * 
      * @return ResponseTransformer
      */
-    public function update (ProfileUpdate $validator, Request $request) {
+    public function update (ProfileUpdate $validator, Request $request, Manager $manager, int $userId = null) {
 
         // find user from request
-        $user = $request->user()->first();
+        $user = empty (trim ($userId)) ? $request->user()->first() : $manager->findUserByAttr ('id', $userId);
+
+        // check if user not found
+        if (!$user) {
+            return ResponseTransformer::response (false, 'user', 'parameter errors', ['User does not exists.'], 404);
+        }
 
         // check for any error if occur
         if ($validation = $this->validateProfileFields ($validator, $request->all(), $user->id)) {
@@ -134,7 +142,7 @@ class User extends Controller {
         }
 
         // update user information
-        if ((new Manager)->updateUserProfile ($user, $request->only (['firstName', 'lastName', 'mobile', 'countryId', 'image', 'address', 'postCode']))) {
+        if ($manager->updateUserProfile ($user, $request->only (['firstName', 'lastName', 'mobile', 'countryId', 'image', 'address', 'postCode']))) {
             return ResponseTransformer::response (true, 'User', 'User detail successfully updated');
         }
 
@@ -158,36 +166,54 @@ class User extends Controller {
      * Method to update password of login user
      * 
      * @api users/change-password
+     * @api users/{userId}/change-password
      * @method PUT
      * 
      * @success-format: {"status":"success","title":"user","message":"password successfully updated.","data":{}}
+     * 
+     * @access login-user/admin
      * 
      * @table:  tbl_users
      * 
      * @return ResponseTransformer
      */
-    public function changePassword (Password $validator, Request $request) {
-        // validate change password fields
-        $validator->rules['oldPassword'] = $validator->rules['password'];
+    public function changePassword (Password $validator, Request $request, Manager $manager, int $userId = null) {        
 
-        // check for any error if occur
-        if ($validation = $validator->validate ($request->all())) {
+        // validate request parameters for login user only
+        if (empty (trim ($userId)) && $validation = $this->validateChangePasswordParams ($validator, $request->all())) {
             return ResponseTransformer::response (false, 'user', 'parameter errors', $validation->messages()->toArray(), 422);
         }
 
-        // fetch user information
-        $user = $request->user()->first();
+        // find user from request or ID
+        $user = empty (trim ($userId)) ? $request->user()->first() : $manager->findUserByAttr ('id', $userId);
+
+        // check if user not found
+        if (!$user) {
+            return ResponseTransformer::response (false, 'user', 'parameter errors', ['User does not exists.'], 404);
+        }
 
         // verify user old password
-        if (!app('hash')->check ($request->oldPassword, $user->password)) {
+        if (empty (trim ($userId)) && !app('hash')->check ($request->oldPassword, $user->password)) {
             return ResponseTransformer::response (false, 'user', 'Permission denied', ['Invalid old password'], 403);
         }
 
         // update user password
-        if ((new Manager)->updateUser ($user, $request->only (['password']))) {
+        if ($manager->updateUser ($user, $request->only (['password']))) {
             return ResponseTransformer::response (true, 'user', 'password successfully updated.');
         }
 
         return ResponseTransformer::response (false, 'user');
+    }
+
+    /**
+     * Method to validate change password field
+     * 
+     * @return Validator
+     */
+    private function validateChangePasswordParams (Password $validator, array $params) {
+        // validate change password fields
+        $validator->rules['oldPassword'] = $validator->rules['password'];
+
+        return $validator->validate ($params);
     }
 }
