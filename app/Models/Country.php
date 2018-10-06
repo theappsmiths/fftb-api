@@ -23,7 +23,7 @@ class Country extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'phoneCode'
+        'name', 'phoneCode', 'image'
     ];
 
     /**
@@ -32,8 +32,16 @@ class Country extends Model
      * @var array
      */
     protected $hidden = [
-        'updated_at', 'created_at', 'deleted_at'
+        'updated_at', 'created_at', 'deleted_at',
+        'image'
     ];
+
+    /**
+     * add custom values
+     * 
+     * @var array
+     */
+    protected $appends = ['flag'];
 
      /**
      * The attributes that should be cast to native types.
@@ -45,4 +53,8 @@ class Country extends Model
         'created_at' => 'timestamp',
         'updated_at' => 'timestamp',
     ];
+
+    public function getFlagAttribute () {
+        return url('/image/flag/'.$this->id);
+    }
 }

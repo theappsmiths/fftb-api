@@ -15,6 +15,7 @@ class CreateCountriesTable extends Migration
     {
         Schema::create('tbl_countries', function (Blueprint $table) {
             $table->increments('id');
+            $table->string ('image', 255)->nullable()->comment('flag image of the country');
             $table->string ('name', 255)->nullable()->comment('name of the country');
             $table->unsignedMediumInteger ('phoneCode')->nullable()->comment('phone code for country');
             $table->softDeletes();
