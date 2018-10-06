@@ -59,10 +59,12 @@ class User extends Controller {
             $manager->saveUserProfile ($user, $request->only (['firstName', 'lastName', 'mobile', 'countryId', 'address', 'postCode', 'image']));
 
             // check for device detail in header
-            if ($request->hasHeader('deviceToken') && $request->hasHeader('deviceType') && $request->hasHeader('fcmToken')) {
-                // save user device detail
-                $manager->saveUserDeviceDetail ($user, $requestHeader);
-            }
+            // save user device detail
+            $manager->saveUserDeviceDetail (
+                $user, 
+                $request->ip(), 
+                ($request->hasHeader('deviceToken') && $request->hasHeader('deviceType') && $request->hasHeader('fcmToken')) ? $requestHeader : null
+            );
 
             // return success response
             return ResponseTransformer::response (true, 'user', 'user successfully registered', [], 201);

@@ -32,11 +32,16 @@ class Manager {
      * 
      * @return collection
      */
-    public function saveUserDeviceDetail ($user, array $deviceDetail) {
-        $device = new Device ($deviceDetail['deviceToken'], $deviceDetail['deviceType'], $deviceDetail['fcmToken']);
+    public function saveUserDeviceDetail ($user, string $ip, array $deviceDetail = null) {
+        $device = null;
+
+        // check if device detail found
+        if ($deviceDetail) {
+            $device = (new Device ($deviceDetail['deviceToken'], $deviceDetail['deviceType'], $deviceDetail['fcmToken']))->toArray();
+        }
 
         // save device information of the user device
-        return $user->device()->UpdateOrCreate(['deviceDetail' => json_encode ($device->toArray())], ['deviceDetail' => $device->toArray()]);
+        return $user->device()->create(['deviceDetail' => $device, 'ipAddress' => $ip]);
     }
 
     /**

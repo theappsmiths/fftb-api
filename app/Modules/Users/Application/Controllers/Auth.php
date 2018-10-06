@@ -68,10 +68,12 @@ class Auth extends AccessTokenController {
             $token = $this->tokens->find($tokenId);
 
             // check for device detail in header
-            if (count ($this->fetchDeviceParamFromHeader ($request))) {
-                // save user device detail
-                (new Manager)->saveUserDeviceDetail ($token->user()->first(), $this->fetchDeviceParamFromHeader ($request));
-            }
+            // save user device detail
+            (new Manager)->saveUserDeviceDetail (
+                $token->user()->first(), 
+                $request->getServerParams()['REMOTE_ADDR'],
+                count ($this->fetchDeviceParamFromHeader ($request)) ? $this->fetchDeviceParamFromHeader ($request) : null
+            );
             
             // logout user other than current login
             $this->revokeOrDeleteAccessTokens($token, $tokenId);
