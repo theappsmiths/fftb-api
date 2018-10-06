@@ -216,4 +216,43 @@ class User extends Controller {
 
         return $validator->validate ($params);
     }
+
+    /**
+     * Method to delete user account
+     * 
+     * @api users
+     * @method  DELETE
+     * 
+     * @success-format: 
+     * 
+     * @table:  tbl_users
+     * 
+     * @access any
+     * 
+     * @return 
+     */
+    public function delete (Password $validator, Request $request) {
+        // validate request parameters for login user only
+        if ($validation = $validator->validate (['password' => $request->getHeader('password')])) {
+            return ResponseTransformer::response (false, 'user', 'parameter errors', $validation->messages()->toArray(), 422);
+        }
+
+        // get login-user
+        $user = $request->user()->first();
+
+        // verify user password
+        if (!app('hash')->check ($request->password, $user->password)) {
+            return ResponseTransformer::response (false, 'user', 'Permission denied', ['Invalid old password'], 403);
+        }
+
+        // delete user account and logout him
+        if ($user->delete()) {
+            // logout the user from everywhere
+            $user->AauthAcessToken()->delete();
+
+            return ResponseTransformer::response (true, 'user', 'User successfully deleted');
+        }
+
+        return ResponseTransformer::response (false, 'user');
+    }
 }

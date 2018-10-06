@@ -16,6 +16,7 @@ class CreateUsersDeviceTable extends Migration
         Schema::create('tbl_user_device_detail', function (Blueprint $table) {
             $table->unsignedInteger('userId')->nullabel()->comment('Reference from tbl_user.');
             $table->text('deviceDetail')->nullable()->comment('store the device detail of the user.fcmId, deviceId, etc');
+            $table->ipAddress('ipAddress')->nullable()->comment('device ip from where user signup/login.');
             $table->softDeletes();
             $table->timestamps();
         });

@@ -26,6 +26,7 @@ $router->group(['prefix' => 'users', 'namespace' => '\App\Modules\Users\Applicat
         $router->get ('/', 'User@detail');
         $router->put ('/', 'User@update');
         $router->put ('/change-password', 'User@changePassword');
+        $router->delete ('/', 'User@deleteAccount');
 
         // API's access by admin only
         $router->group (['middleware' => 'role:admin'], function () use ($router) {

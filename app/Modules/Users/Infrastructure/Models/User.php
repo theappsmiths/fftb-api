@@ -17,6 +17,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     use Authenticatable, Authorizable, SoftDeletes, HasApiTokens;
 
     const ROLE_CUSTOMER = 'customer';
+    const DEFAULT_STATUS = true;
 
     /**
      * The table associated with the model.
@@ -31,7 +32,8 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $fillable = [
-        'password', 'email', 'role'
+        'password', 'email', 'role', 
+        'status', 'reason'
     ];
 
     /**
@@ -41,7 +43,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     protected $hidden = [
         'updated_at', 'created_at', 'deleted_at',
-        'password',
+        'password', 'status', 'reason'
     ];
 
     /**
@@ -50,7 +52,8 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $attributes = [
-        'role' => self::ROLE_CUSTOMER
+        'role' => self::ROLE_CUSTOMER,
+        'status' => self::DEFAULT_STATUS
     ];
 
      /**
@@ -62,6 +65,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'deleted_at' => 'timestamp',
         'created_at' => 'timestamp',
         'updated_at' => 'timestamp',
+        'status' => 'boolean'
     ];
 
     /*******Methods for Getter Setter*********/
